@@ -35,7 +35,17 @@ namespace my
         void reserve(size_t n);
         void shrink_to_fit();
 
-        // 
+        // Access to class members
+        T &front();
+        const T &front() const;
+        T &back();
+        const T &back() const;
+        T *data();
+        const T *data() const;
+        T &operator[](size_t i);
+        const T &operator[](size_t i) const;
+        T &at(size_t i);
+        const T &at(size_t i) const;
     };
 
     template <class T>
@@ -172,6 +182,74 @@ namespace my
         delete[] data_;
         data_ = a;
         capacity_ = size_;
+    }
+
+    template <class T>
+    inline T &vector<T>::front()
+    {
+        return data_[0];
+    }
+
+    template <class T>
+    inline const T &vector<T>::front() const
+    {
+        return data_[0];
+    }
+
+    template <class T>
+    inline T &vector<T>::back()
+    {
+        return data_[size_ - 1];
+    }
+
+    template <class T>
+    inline const T &vector<T>::back() const
+    {
+        return data_[size_ - 1];
+    }
+
+    template <class T>
+    inline T *vector<T>::data()
+    {
+        return data_;
+    }
+
+    template <class T>
+    inline const T *vector<T>::data() const
+    {
+        return data_;
+    }
+
+    template <class T>
+    inline T &vector<T>::operator[](size_t i)
+    {
+        return data_[i];
+    }
+
+    template <class T>
+    inline const T &vector<T>::operator[](size_t i) const
+    {
+        return data_[i];
+    }
+
+    template <class T>
+    inline T & vector<T>::at(size_t i)
+    {
+        if (i < 0 || size_ <= i)
+        {
+            throw "out_of_range";
+        }
+        return data_[i];
+    }
+
+    template <class T>
+    inline const T &vector<T>::at(size_t i) const
+    {
+        if (i < 0 || size_ <= i)
+        {
+            throw "out_of_range";
+        }
+        return data_[i];
     }
 
 } // namespace my

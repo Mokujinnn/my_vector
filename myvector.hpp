@@ -18,7 +18,9 @@ namespace my
         vector(size_t _size);
         vector(size_t _size, const T &value);
         vector(const vector &vec);
+        vector(const vector &&vec);
         const vector &operator=(const vector &vec);
+        const vector &operator=(const vector &&vec);
         ~vector();
 
         // class iterator;
@@ -32,6 +34,8 @@ namespace my
         constexpr bool empty() const noexcept;
         void reserve(size_t n);
         void shrink_to_fit();
+
+        // 
     };
 
     template <class T>
@@ -79,6 +83,14 @@ namespace my
     }
 
     template <class T>
+    inline vector<T>::vector(const vector<T> &&vec)
+        : capacity_(vec.capacity_),
+          size_(vec.size_),
+          data_(vec.data_)
+    {
+    }
+
+    template <class T>
     inline const vector<T> &vector<T>::operator=(const vector<T> &vec)
     {
         if (this == &vec)
@@ -95,6 +107,16 @@ namespace my
         {
             data_[i] = vec.data_[i];
         }
+
+        return *this;
+    }
+
+    template <class T>
+    inline const vector<T> &vector<T>::operator=(const vector<T> &&vec)
+    {
+        capacity_ = vec.capacity_;
+        size_ = vec.size_;
+        std::swap(data_, vec.data_);
 
         return *this;
     }

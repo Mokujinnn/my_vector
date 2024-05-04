@@ -17,6 +17,7 @@ namespace my
         vector(size_t _size);
         vector(size_t _size, const T &value);
         vector(const vector &vec);
+        const vector &operator=(const vector &vec);
         ~vector();
     };
 
@@ -62,6 +63,27 @@ namespace my
         {
             data[i] = vec.data[i];
         }
+    }
+
+    template <class T>
+    inline const vector<T> &vector<T>::operator=(const vector<T> &vec)
+    {
+        if (this == &vec)
+        {
+            return *this;
+        }
+        
+        delete [] data;
+        data = new T[vec.capacity];
+        capacity = vec.capacity;
+        size = vec.size;
+
+        for (size_t i = 0; i < vec.capacity; ++i)
+        {
+            data[i] = vec.data[i];
+        }
+        
+        return *this;
     }
 
     template <class T>

@@ -1,5 +1,7 @@
 #pragma once
-#include <stddef.h>
+#include <cstddef>
+#include <initializer_list>
+#include <iterator>
 
 namespace my
 {
@@ -19,14 +21,10 @@ namespace my
         vector(size_t _size, const T &value);
         vector(const vector &vec);
         vector(const vector &&vec);
+        // vector(std::initializer_list<T> l);
         const vector &operator=(const vector &vec);
         const vector &operator=(const vector &&vec);
         ~vector();
-
-        // class iterator;
-        // iterator begin();
-        // const iterator cbegin();
-        // iterator end();
 
         // Capacity
         size_t size() const noexcept;
@@ -46,7 +44,160 @@ namespace my
         const T &operator[](size_t i) const;
         T &at(size_t i);
         const T &at(size_t i) const;
+
+        // Iterator
+        template <class Iter>
+        class myIterator
+        {
+        private:
+            friend class my::vector<T>;
+
+            myIterator(Iter *p) : value(p) {}
+
+        public:
+            typedef Iter iterator_type;
+            typedef std::random_access_iterator_tag iterator_category;
+            typedef iterator_type value_type;
+            typedef iterator_type &reference;
+            typedef iterator_type *pointer;
+            typedef ptrdiff_t difference_type;
+
+            iterator_type *value;
+
+            myIterator(const myIterator &it) : value(it.value) {}
+
+            bool operator==(const myIterator &other) const
+            {
+                return value == other.value;
+            }
+
+            bool operator!=(const myIterator &other) const
+            {
+                return value != other.value;
+            }
+
+            bool operator<(const myIterator &other) const
+            {
+                return value < other.value;
+            }
+
+            bool operator>(const myIterator &other) const
+            {
+                return value > other.value;
+            }
+
+            bool operator<=(const myIterator &other) const
+            {
+                return value <= other.value;
+            }
+
+            bool operator>=(const myIterator &other) const
+            {
+                return value >= other.value;
+            }
+
+            typename myIterator::reference operator*()
+            {
+                return *value;
+            }
+
+            typename myIterator::pointer operator->()
+            {
+                return value;
+            }
+
+            myIterator &operator++()
+            {
+                ++value;
+                return *this;
+            }
+
+            myIterator operator++(int)
+            {
+                myIterator tmp(*this);
+                ++value;
+                return tmp;
+            }
+
+            myIterator &operator--()
+            {
+                --value;
+                return *this;
+            }
+
+            myIterator operator--(int)
+            {
+                myIterator tmp(*this);
+                --value;
+                return tmp;
+            }
+
+            myIterator operator+(difference_type n) const
+            {
+                return myIterator(value + n);
+            }
+
+            myIterator operator-(difference_type n) const
+            {
+                return myIterator(value - n);
+            }
+
+            difference_type operator+(const myIterator &other) const
+            {
+                return value + other.value;
+            }
+
+            difference_type operator-(const myIterator &other) const
+            {
+                return value - other.value;
+            }
+
+            myIterator& operator+=(difference_type n)
+            {
+                value += n;
+                return *this;
+            }
+
+            myIterator& operator-=(difference_type n)
+            {
+                value -= n;
+                return *this;
+            }
+
+            friend myIterator operator+(difference_type n, const myIterator &it)
+            {
+                return myIterator(n + it.value);
+            }
+
+            friend myIterator operator-(difference_type n, const myIterator &it)
+            {
+                return myIterator(n - it.value);
+            }
+
+            reference operator[](difference_type n)
+            {
+                return value[n];
+            }
+        };
+
+        typedef myIterator<T> iterator;
+        typedef myIterator<const T> const_iterator;
+        typedef std::reverse_iterator<iterator> reverse_iterator;
+        typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+        iterator begin();
+        iterator end();
+        const_iterator cbegin();
+        const_iterator cend();
+        reverse_iterator rbegin();
+        reverse_iterator rend();
+        const_reverse_iterator rcbegin();
+        const_reverse_iterator rcend();
     };
+
+    //
+    // Constructors and destructor
+    //
 
     template <class T>
     inline vector<T>::vector()
@@ -100,6 +251,18 @@ namespace my
     {
     }
 
+    // template <class T>
+    // inline vector<T>::vector(std::initializer_list<T> l)
+    //     : capacity_(l.size()),
+    //       size_(capacity_),
+    //       data_(new T[capacity_])
+    // {
+    //     for (size_t i = 0; i < size_; ++i)
+    //     {
+    //         data_[i] = l[i];
+    //     }
+    // }
+
     template <class T>
     inline const vector<T> &vector<T>::operator=(const vector<T> &vec)
     {
@@ -136,6 +299,14 @@ namespace my
     {
         delete[] data_;
     }
+
+    //
+    // Constructors and destructor end
+    //
+
+    //
+    // Capacity
+    //
 
     template <class T>
     inline size_t vector<T>::size() const noexcept
@@ -183,6 +354,14 @@ namespace my
         data_ = a;
         capacity_ = size_;
     }
+
+    //
+    // Capacity
+    //
+
+    //
+    // Access to class members
+    //
 
     template <class T>
     inline T &vector<T>::front()
@@ -233,7 +412,7 @@ namespace my
     }
 
     template <class T>
-    inline T & vector<T>::at(size_t i)
+    inline T &vector<T>::at(size_t i)
     {
         if (i < 0 || size_ <= i)
         {
@@ -250,6 +429,62 @@ namespace my
             throw "out_of_range";
         }
         return data_[i];
+    }
+
+    //
+    // Access to class members
+    //
+
+    //
+    // Iterator
+    //
+
+    template <class T>
+    inline typename vector<T>::iterator vector<T>::begin()
+    {
+        return data_;
+    }
+
+    template <class T>
+    inline typename vector<T>::iterator vector<T>::end()
+    {
+        return data_ + size_;
+    }
+    
+    template <class T>
+    inline typename vector<T>::const_iterator vector<T>::cbegin()
+    {
+        return data_;
+    }
+
+    template <class T>
+    inline typename vector<T>::const_iterator vector<T>::cend()
+    {
+        return data_ + size_;
+    }
+
+    template <class T>
+    inline typename vector<T>::reverse_iterator vector<T>::rbegin()
+    {
+        return std::reverse_iterator<my::vector<T>::iterator>(end());
+    }
+
+    template <class T>
+    inline typename vector<T>::reverse_iterator vector<T>::rend()
+    {
+        return std::reverse_iterator<my::vector<T>::iterator>(begin());
+    }
+
+    template <class T>
+    inline typename vector<T>::const_reverse_iterator vector<T>::rcbegin()
+    {
+        return std::reverse_iterator<my::vector<T>::iterator>(cend());
+    }
+
+    template <class T>
+    inline typename vector<T>::const_reverse_iterator vector<T>::rcend()
+    {
+        return std::reverse_iterator<my::vector<T>::iterator>(cbegin());
     }
 
 } // namespace my

@@ -1,15 +1,26 @@
 #include <iostream>
+#include <string>
+#include <algorithm>
 
 #include "myvector.hpp"
 
 int main(int argc, char const *argv[])
 {
     
-    my::vector<int> vec(my::vector<int>(5, 5));
-    
-    for (size_t i = 0; i < 5; i++)
+    my::vector<int> vec(5, 5); 
+
+    vec[0] = 16;
+    vec[1] = -16;
+    vec[2] = 126;
+    vec[3] = 77;
+    vec[4] = 0;
+
+
+    std::sort(vec.rbegin(), vec.rend());
+
+    for (auto &&i : vec)
     {
-        std::cout << vec[i] << ' ';
+        std::cout << i << '\n';
     }
     
 

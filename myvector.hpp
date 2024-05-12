@@ -21,7 +21,7 @@ namespace my
         vector(size_t _size, const T &value);
         vector(const vector &vec);
         vector(const vector &&vec);
-        // vector(std::initializer_list<T> l);
+        vector(std::initializer_list<T> l);
         const vector &operator=(const vector &vec);
         const vector &operator=(const vector &&vec);
         ~vector();
@@ -251,17 +251,18 @@ namespace my
     {
     }
 
-    // template <class T>
-    // inline vector<T>::vector(std::initializer_list<T> l)
-    //     : capacity_(l.size()),
-    //       size_(capacity_),
-    //       data_(new T[capacity_])
-    // {
-    //     for (size_t i = 0; i < size_; ++i)
-    //     {
-    //         data_[i] = l[i];
-    //     }
-    // }
+    template <class T>
+    inline vector<T>::vector(std::initializer_list<T> l)
+        : capacity_(l.size()),
+          size_(capacity_),
+          data_(new T[capacity_])
+    {
+        auto it = l.begin();
+        for (size_t i = 0; i < size_; i++)
+        {
+            data_[i] = *it++;
+        }
+    }
 
     template <class T>
     inline const vector<T> &vector<T>::operator=(const vector<T> &vec)

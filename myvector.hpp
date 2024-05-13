@@ -45,6 +45,15 @@ namespace my
         T &at(size_t i);
         const T &at(size_t i) const;
 
+        // Modifiers
+        void clear();
+        void insert();
+        void erase();
+        void push_back();
+        void pop_back();
+        void resize();
+        void swap(my::vector<T> &other);
+
         // Iterator
         template <class Iter>
         class myIterator
@@ -152,13 +161,13 @@ namespace my
                 return value - other.value;
             }
 
-            myIterator& operator+=(difference_type n)
+            myIterator &operator+=(difference_type n)
             {
                 value += n;
                 return *this;
             }
 
-            myIterator& operator-=(difference_type n)
+            myIterator &operator-=(difference_type n)
             {
                 value -= n;
                 return *this;
@@ -187,12 +196,12 @@ namespace my
 
         iterator begin();
         iterator end();
-        const_iterator cbegin();
-        const_iterator cend();
+        const_iterator begin() const;
+        const_iterator end() const;
         reverse_iterator rbegin();
         reverse_iterator rend();
-        const_reverse_iterator rcbegin();
-        const_reverse_iterator rcend();
+        const_reverse_iterator rbegin() const;
+        const_reverse_iterator rend() const;
     };
 
     //
@@ -235,7 +244,7 @@ namespace my
     inline vector<T>::vector(const vector<T> &vec)
         : capacity_(vec.capacity_),
           size_(vec.size_),
-          data_(new T[vec.capacity_])
+          data_(new T[size_])
     {
         for (size_t i = 0; i < vec.size_; ++i)
         {
@@ -290,7 +299,7 @@ namespace my
     {
         capacity_ = vec.capacity_;
         size_ = vec.size_;
-        std::swap(data_, vec.data_);
+        data_ = std::move(vec.data_);
 
         return *this;
     }
@@ -451,15 +460,15 @@ namespace my
     {
         return data_ + size_;
     }
-    
+
     template <class T>
-    inline typename vector<T>::const_iterator vector<T>::cbegin()
+    inline typename vector<T>::const_iterator vector<T>::begin() const
     {
         return data_;
     }
 
     template <class T>
-    inline typename vector<T>::const_iterator vector<T>::cend()
+    inline typename vector<T>::const_iterator vector<T>::end() const
     {
         return data_ + size_;
     }
@@ -477,15 +486,23 @@ namespace my
     }
 
     template <class T>
-    inline typename vector<T>::const_reverse_iterator vector<T>::rcbegin()
+    inline typename vector<T>::const_reverse_iterator vector<T>::rbegin() const
     {
-        return std::reverse_iterator<my::vector<T>::iterator>(cend());
+        return std::reverse_iterator<my::vector<T>::iterator>(end());
     }
 
     template <class T>
-    inline typename vector<T>::const_reverse_iterator vector<T>::rcend()
+    inline typename vector<T>::const_reverse_iterator vector<T>::rend() const
     {
-        return std::reverse_iterator<my::vector<T>::iterator>(cbegin());
+        return std::reverse_iterator<my::vector<T>::iterator>(begin());
     }
+
+    //
+    // Iterator
+    //
+
+    //
+    // Modifiers
+    //
 
 } // namespace my

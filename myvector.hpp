@@ -20,7 +20,7 @@ namespace my
         vector(size_t _size);
         vector(size_t _size, const T &value);
         vector(const vector &vec);
-        vector(const vector &&vec);
+        vector(vector &&vec);
         vector(std::initializer_list<T> l);
         const vector &operator=(const vector &vec);
         const vector &operator=(const vector &&vec);
@@ -49,7 +49,7 @@ namespace my
         void clear();
         void insert();
         void erase();
-        void push_back();
+        void push_back(const T& value);
         void pop_back();
         void resize();
         void swap(my::vector<T> &other);
@@ -253,11 +253,12 @@ namespace my
     }
 
     template <class T>
-    inline vector<T>::vector(const vector<T> &&vec)
+    inline vector<T>::vector(vector<T> &&vec)
         : capacity_(vec.capacity_),
           size_(vec.size_),
           data_(vec.data_)
     {
+        vec.data_ = nullptr;
     }
 
     template <class T>
@@ -307,7 +308,8 @@ namespace my
     template <class T>
     vector<T>::~vector()
     {
-        delete[] data_;
+        if (data_ != nullptr)
+            delete[] data_;
     }
 
     //
@@ -504,5 +506,26 @@ namespace my
     //
     // Modifiers
     //
+
+    template <class T>
+    inline void vector<T>::push_back(const T& value)
+    {
+        if (capacity_ <= size_)
+        {
+            capacity_ *= 2;
+            T * a = new T[capacity_];
+
+            for (size_t i = 0; i < size_; ++i)
+            {
+                a[i] = data_[i];
+            }
+            
+            delete [] data_;
+            data_ = a;
+        }
+        
+        data_[size_] = value;
+        ++size_;
+    }
 
 } // namespace my

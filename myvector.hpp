@@ -14,6 +14,7 @@ namespace my
         size_t size_;
         T *data_;
 
+        void new_capacity();
     public:
         // Constructors and destructor
         vector();
@@ -44,15 +45,6 @@ namespace my
         const T &operator[](size_t i) const;
         T &at(size_t i);
         const T &at(size_t i) const;
-
-        // Modifiers
-        void clear();
-        void insert();
-        void erase();
-        void push_back(const T& value);
-        void pop_back();
-        void resize();
-        void swap(my::vector<T> &other);
 
         // Iterator
         template <class Iter>
@@ -198,10 +190,27 @@ namespace my
         iterator end();
         const_iterator begin() const;
         const_iterator end() const;
+        const_iterator cbegin() const;
+        const_iterator cend() const;
         reverse_iterator rbegin();
         reverse_iterator rend();
         const_reverse_iterator rbegin() const;
         const_reverse_iterator rend() const;
+        const_reverse_iterator crbegin() const;
+        const_reverse_iterator crend() const;
+
+        // Modifiers
+        void clear();
+        iterator insert(iterator pos, T &&value);
+        iterator insert(iterator pos, const T &value);
+        iterator erase(iterator pos);
+        iterator erase(const_iterator pos);
+        void push_back(const T &value);
+        void push_back(T &&value);
+        void pop_back();
+        void resize(size_t count);
+        void resize(size_t count, const T &value);
+        void swap(my::vector<T> &other);
     };
 
     //
@@ -476,6 +485,18 @@ namespace my
     }
 
     template <class T>
+    inline typename vector<T>::const_iterator vector<T>::cbegin() const
+    {
+        return data_;
+    }
+
+    template <class T>
+    inline typename vector<T>::const_iterator vector<T>::cend() const
+    {
+        return data_ + size_;
+    }
+
+    template <class T>
     inline typename vector<T>::reverse_iterator vector<T>::rbegin()
     {
         return std::reverse_iterator<my::vector<T>::iterator>(end());
@@ -499,6 +520,18 @@ namespace my
         return std::reverse_iterator<my::vector<T>::iterator>(begin());
     }
 
+    template <class T>
+    inline typename vector<T>::const_reverse_iterator vector<T>::crbegin() const
+    {
+        return std::reverse_iterator<my::vector<T>::iterator>(cend());
+    }
+
+    template <class T>
+    inline typename vector<T>::const_reverse_iterator vector<T>::crend() const
+    {
+        return std::reverse_iterator<my::vector<T>::iterator>(cbegin());
+    }
+
     //
     // Iterator
     //
@@ -508,24 +541,234 @@ namespace my
     //
 
     template <class T>
-    inline void vector<T>::push_back(const T& value)
+    inline void vector<T>::new_capacity()
     {
+        capacity_ *= 2;
+        T *a = new T[capacity_];
+
+        for (size_t i = 0; i < size_; ++i)
+        {
+            a[i] = data_[i];
+        }
+
+        delete[] data_;
+        data_ = a;
+    }
+
+    template <class T>
+    inline void vector<T>::push_back(const T &value)
+    {
+        if (data_ == nullptr)
+        {
+            data_ = new T[5];
+        }
+
         if (capacity_ <= size_)
         {
-            capacity_ *= 2;
-            T * a = new T[capacity_];
-
-            for (size_t i = 0; i < size_; ++i)
-            {
-                a[i] = data_[i];
-            }
-            
-            delete [] data_;
-            data_ = a;
+            new_capacity();
         }
-        
+
         data_[size_] = value;
         ++size_;
+    }
+
+    template <class T>
+    inline void vector<T>::push_back(T &&value)
+    {
+        if (data_ == nullptr)
+        {
+            data_ = new T[5];
+        }
+
+        if (capacity_ <= size_)
+        {
+            new_capacity();
+        }
+
+        data_[size_] = value;
+        ++size_;
+    }
+
+    template <class T>
+    inline void vector<T>::pop_back()
+    {
+        if (size_ > 0)
+        {
+            data_[--size_] = T();
+        }
+    }
+
+    template <class T>
+    inline void vector<T>::clear()
+    {
+        size_ = 0;
+        capacity_ = 0;
+        delete[] data_;
+        data_ = nullptr;
+    }
+
+    template <class T>
+    inline typename vector<T>::iterator vector<T>::insert(iterator pos, T &&value)
+    {
+        if (pos > end())
+        {
+            return end();
+        }
+        else if (pos == end())
+        {
+            push_back(value);
+            return pos;
+        }
+
+        if (capacity_ <= size_)
+        {
+            new_capacity();
+        }
+
+        ++size_;
+        for (int i = size_ ; i > pos - begin(); --i)
+        {
+            data_[i] = data_[i-1];
+        }
+        *pos = value;
+
+        return pos;
+    }
+
+    template <class T>
+    inline typename vector<T>::iterator vector<T>::insert(iterator pos, const T &value)
+    {
+        if (pos > end())
+        {
+            return end();
+        }
+        else if (pos == end())
+        {
+            push_back(value);
+            return pos;
+        }
+
+        if (capacity_ <= size_)
+        {
+            new_capacity();
+        }
+
+        ++size_;
+        for (int i = size_ ; i > pos - begin(); --i)
+        {
+            data_[i] = data_[i-1];
+        }
+        *pos = value;
+
+        return pos;
+    }
+
+    template <class T>
+    inline typename vector<T>::iterator vector<T>::erase(iterator pos)
+    {
+        if (pos >= end())
+        {
+            return end();
+        }
+        else if (pos == end() - 1)
+        {
+            pop_back();
+            return pos;
+        }
+
+        --size_;
+        for (size_t i = pos - begin() ; i < size_; ++i)
+        {
+            data_[i] = data_[i+1];
+        }
+        data_[size_] = T();
+
+        return pos;
+    }
+
+    template <class T>
+    inline typename vector<T>::iterator vector<T>::erase(const_iterator pos)
+    {
+        if (pos >= end())
+        {
+            return end();
+        }
+        else if (pos == end() - 1)
+        {
+            pop_back();
+            return pos;
+        }
+
+        --size_;
+        for (size_t i = pos - begin() ; i < size_; ++i)
+        {
+            data_[i] = data_[i+1];
+        }
+        data_[size_] = T();
+
+        return pos;
+    }
+
+    template <class T>
+    inline void vector<T>::resize(size_t count)
+    {
+        if (count == size_)
+        {
+            return;
+        }
+        else if (count < size_)
+        {
+            for (size_t i = count; i < size_; ++i)
+            {
+                data_[i] = T();
+            }
+            size_ = count;
+
+            return;
+        }
+        
+        for (size_t i = size_; i < count; ++i)
+        {
+            data_[i] = T();
+        }
+        size_ = count;
+
+        return;
+    }
+
+    template <class T>
+    inline void vector<T>::resize(size_t count, const T &value)
+    {
+        if (count == size_)
+        {
+            return;
+        }
+        else if (count < size_)
+        {
+            for (size_t i = count; i < size_; ++i)
+            {
+                data_[i] = T();
+            }
+            size_ = count;
+
+            return;
+        }
+        
+        for (size_t i = size_; i < count; ++i)
+        {
+            data_[i] = value;
+        }
+        size_ = count;
+
+        return;
+    }
+
+    template<class T>
+    inline void vector<T>::swap(vector<T> &other)
+    {
+        std::swap(this->size_, other.size_);
+        std::swap(this->capacity_, other.capacity_);
+        std::swap(this->data_, other.data_);
     }
 
 } // namespace my
